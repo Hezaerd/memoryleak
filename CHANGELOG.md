@@ -1,6 +1,13 @@
 # Changelog
 
-## [1.0.0] - 2026-01-24
+## 2.0.0
+
+### Added
+- Ported the mod to a Fabric + NeoForge multiloader layout.
+- Added shared command and leak logic.
+
+
+## 1.0.0
 
 ### Added
 - Initial release
