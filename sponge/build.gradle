@@ -39,7 +39,7 @@ sponge {
         entrypoint('com.hezaerd.memoryleak.sponge.MemoryLeakPlugin')
         description(project.description ?: 'A controlled heap stress test for server administrators')
         dependency('spongeapi') {
-            version('17.0.0')
+            version('[17.0.0,18.0.0)')
             loadOrder(PluginDependency.LoadOrder.AFTER)
             optional(false)
         }
