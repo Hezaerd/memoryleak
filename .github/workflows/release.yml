@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  MODRINTH_PROJECT: Aqk3l0pH
+
+jobs:
+  modrinth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check tag, version, and changelog agree
+        run: |
+          version=$(sed -n 's/^version=//p' gradle.properties)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version=$version in gradle.properties"
+            exit 1
+          fi
+          if ! grep -Eq "^## ${version//./[.]}( |$)" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## $version' section"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v6
+
+      - run: ./gradlew buildAll --parallel --max-workers=2
+
+      - name: Skip builds already on Modrinth
+        id: published
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: |
+          args=$(curl -fsS -H "Authorization: $MODRINTH_TOKEN" \
+              "https://api.modrinth.com/v2/project/$MODRINTH_PROJECT/version" \
+            | jq -r --arg prefix "$VERSION+" '.[].version_number
+                | select(startswith($prefix)) | ltrimstr($prefix) | ltrimstr("mc")
+                | "-x :\(.):publishMods"' \
+            | tr '\n' ' ')
+          echo "Already published: ${args:-none}"
+          echo "args=$args" >> "$GITHUB_OUTPUT"
+
+      - run: ./gradlew publishAll ${{ steps.published.outputs.args }}
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
