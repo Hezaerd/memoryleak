@@ -55,7 +55,7 @@ public final class MemoryLeakPlugin extends Plugin {
             case SUCCESS: return ChatColor.GREEN;
             case WARNING: return ChatColor.YELLOW;
             case ERROR: return ChatColor.RED;
-            default: return ChatColor.AQUA;
+            default: return ChatColor.GRAY;
         }
     }
 }

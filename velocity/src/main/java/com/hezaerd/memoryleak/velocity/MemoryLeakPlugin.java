@@ -107,7 +107,7 @@ public final class MemoryLeakPlugin {
         return switch (tone) {
             case SUCCESS -> NamedTextColor.GREEN;
             case WARNING -> NamedTextColor.YELLOW;
-            case INFO -> NamedTextColor.AQUA;
+            case INFO -> NamedTextColor.GRAY;
             case ERROR -> NamedTextColor.RED;
         };
     }
