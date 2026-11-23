@@ -1,0 +1,13 @@
+name: MemoryLeak
+version: '${version}'
+main: com.hezaerd.memoryleak.bukkit.MemoryLeakPlugin
+api-version: '1.13'
+folia-supported: true
+commands:
+  leak:
+    description: Control the server's memory leak
+    permission: memoryleak.admin
+permissions:
+  memoryleak.admin:
+    description: Control memory leaks and see their progress
+    default: op
