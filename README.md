@@ -1,52 +1,57 @@
-# 🧠 Memory Leak
+# Memory Leak
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Minecraft-1.21.11-green?style=for-the-badge" alt="Minecraft Version">
-  <img src="https://img.shields.io/badge/Mod%20Loader-Fabric-blue?style=for-the-badge" alt="Fabric">
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License">
-</p>
+Memory Leak is a Minecraft server mod for generating controlled memory pressure. It allocates memory over a set number of server ticks and shows progress in a boss bar for administrators.
 
-A Fabric mod for **server administrators** to intentionally cause controlled memory leaks. Perfect for stress testing servers, testing memory monitoring tools, or simulating memory pressure scenarios.
+Use it on test servers. Excessive allocations can crash a server.
 
-## ⚠️ Warning
+## Supported Minecraft versions
 
-This mod is designed for **testing and development purposes only**. Using it on production servers without proper understanding can cause crashes and data loss.
+| Minecraft | Fabric and Quilt | NeoForge | Forge | Java |
+|---|---|---|---|---|
+| 1.20.1 | Yes | | Yes | 17 |
+| 1.21.1 | Yes | Yes | | 21 |
+| 1.21.10 | Yes | Yes | | 21 |
+| 1.21.11 | Yes | Yes | | 21 |
+| 26.1.1, 26.1.2, 26.2 | Yes | Yes | | 25 |
+| 26.3 | Yes | Yes | | 25 |
 
-## ✨ Features
+Download the jar for your Minecraft version and loader from [Modrinth](https://modrinth.com/mod/memory-leak) and place it in the server's `mods` directory. On Fabric and Quilt, also install [Fabric API](https://modrinth.com/mod/fabric-api) for your Minecraft version. Clients can join without Memory Leak installed. For Minecraft 26.1.1 and 26.2, use the 26.1.2 jar.
 
-- **Gradual Memory Leak** - Leak memory over a configurable time period
-- **Boss Bar Progress** - Visual feedback showing leak progress (admin-only)
-- **Full Control** - Start, stop, clear, and check status at any time
-- **Permission-Based** - Only server operators can use leak commands
+## Commands
 
-## 📦 Installation
-
-1. Install [Fabric Loader](https://fabricmc.net/use/installer/) (0.18.4+)
-2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
-3. Download the latest release from [Modrinth](https://modrinth.com/mod/memory-leak)
-4. Place the `.jar` file in your `mods` folder
-
-## 🎮 Commands
-
-All commands require **operator permissions** (level 4).
+The commands require level 4 operator access or Minecraft's equivalent administrator permission.
 
 | Command | Description |
-|---------|-------------|
-| `/leak start <MB> <seconds>` | Start leaking `<MB>` megabytes over `<seconds>` seconds |
-| `/leak stop` | Stop the current leak (keeps leaked memory) |
-| `/leak clear` | Stop leak and free all leaked memory |
-| `/leak status` | Check current leak status |
+|---|---|
+| `/leak start <MB> <seconds>` | Allocate 1 to 10,000 MB over 1 to 3,600 seconds. |
+| `/leak stop` | Stop allocating and keep the leaked memory. |
+| `/leak clear` | Stop allocating and release all leaked memory. |
+| `/leak status` | Show the current progress or total leaked memory. |
 
-## 📜 License
+## Build the mods
 
-This project is licensed under the [MIT License](LICENSE).
+Set `JAVA_HOME` to a JDK 25 installation and run `./gradlew buildMods` from the repository root. On Windows use `.\gradlew.bat buildMods`. Gradle finds or downloads the JDKs required by the individual nodes. The task runs the core tests and writes each distributable jar to `versions/<node>/build/libs/`.
 
-## 🤝 Contributing
+To build one jar, run `./gradlew :<node>:assemble`, for example `./gradlew :1.20.1-forge:assemble`.
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
+## Add a Minecraft version
 
----
+1. Copy an existing loader's `versions/<minecraft>-<loader>/gradle.properties` into a new node directory. Set the Minecraft, Java, loader, and API versions.
+2. Set `minecraft_versions` to the comma-separated Minecraft releases you plan to verify. This list controls loader metadata and Modrinth game versions. Supply `fabric_api_version_<minecraft>` or `loader_version_<minecraft>` if a second release uses a different runtime dependency.
+3. Make Minecraft or loader API changes in `src/main/java/com/hezaerd/memoryleak/MemoryLeak.java` using Stonecutter conditions. Keep allocation and command replies in `core/`.
+4. Build the matrix and smoke-test the new node and every release in its list.
 
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/Hezaerd">Hezaerd</a>
-</p>
+## Run dedicated server smoke tests
+
+Set `JAVA_HOME_17`, `JAVA_HOME_21`, and `JAVA_HOME_25` to the corresponding JDK directories and build the jars. Run the script with Python 3.10 or later. Passing `--accept-eula` accepts the [Minecraft EULA](https://aka.ms/MinecraftEULA) for the test servers.
+
+```sh
+python scripts/smoke-mods.py --accept-eula
+python scripts/smoke-mods.py --accept-eula 1.20.1-forge
+```
+
+The script uses throwaway server directories under `.smoke/`. It leaves the console and installer logs there for inspection.
+
+## License
+
+Memory Leak is licensed under the [MIT License](LICENSE).

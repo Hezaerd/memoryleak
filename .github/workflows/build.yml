@@ -1,0 +1,27 @@
+name: Build mods
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v6
+      - run: ./gradlew buildMods --parallel --max-workers=2
+      - uses: actions/upload-artifact@v7
+        with:
+          name: memory-leak-mods
+          path: versions/*/build/libs/*.jar
+          if-no-files-found: error
