@@ -1,0 +1,62 @@
+import org.spongepowered.gradle.plugin.config.PluginLoaders
+import org.spongepowered.plugin.metadata.model.PluginDependency
+
+
+plugins {
+    id 'java'
+    id 'org.spongepowered.gradle.plugin' version '2.5.1'
+    id 'me.modmuss50.mod-publish-plugin'
+}
+
+repositories {
+    mavenCentral()
+    maven { url = uri('https://repo.spongepowered.org/repository/maven-public/') }
+}
+
+sourceSets.main.java.srcDir project(':core').file('src/main/java')
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+}
+tasks.named('compileJava', JavaCompile) {
+    options.release = 21
+    options.compilerArgs << '-Xlint:-options'
+}
+
+tasks.named('jar', Jar) {
+    archiveBaseName = "memory-leak-sponge"
+}
+sponge {
+    apiVersion('17.0.0')
+    minecraftVersion('1.21.10')
+    license('MIT')
+    loader {
+        name(PluginLoaders.JAVA_PLAIN)
+        version('1.0')
+    }
+    plugin('memoryleak') {
+        displayName('Memory Leak')
+        entrypoint('com.hezaerd.memoryleak.sponge.MemoryLeakPlugin')
+        description(project.description ?: 'A controlled heap stress test for server administrators')
+        dependency('spongeapi') {
+            version('17.0.0')
+            loadOrder(PluginDependency.LoadOrder.AFTER)
+            optional(false)
+        }
+    }
+}
+
+publishMods {
+    file = tasks.named('jar', Jar).flatMap { it.archiveFile }
+    changelog = rootProject.ext.readReleaseChangelog(project.version.toString())
+    version = "${project.version}+sponge"
+    displayName = "${mod_name} ${project.version} for Sponge"
+    type = STABLE
+    modLoaders.addAll(['sponge'])
+
+    modrinth {
+        accessToken = providers.environmentVariable('MODRINTH_TOKEN')
+        projectId = 'Aqk3l0pH'
+        minecraftVersions.addAll(['1.21.10'])
+    }
+}
