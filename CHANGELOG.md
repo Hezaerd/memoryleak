@@ -5,6 +5,7 @@
 ### Added
 - Ported the mod to a Fabric + NeoForge multiloader layout.
 - Added shared command and leak logic.
+- Added server plugins for Bukkit, Spigot, Paper, Purpur, Folia, Velocity, BungeeCord, Waterfall, and SpongeAPI 17.
 
 
 ## 1.0.0
