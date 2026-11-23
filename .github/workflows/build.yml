@@ -1,4 +1,4 @@
-name: Build mods
+name: Build
 
 on:
   push:
@@ -19,9 +19,14 @@ jobs:
           distribution: temurin
           java-version: '25'
       - uses: gradle/actions/setup-gradle@v6
-      - run: ./gradlew buildMods --parallel --max-workers=2
+      - run: ./gradlew buildAll --parallel --max-workers=2
       - uses: actions/upload-artifact@v7
         with:
-          name: memory-leak-mods
-          path: versions/*/build/libs/*.jar
+          name: memory-leak
+          path: |
+            versions/*/build/libs/*.jar
+            bukkit/build/libs/*.jar
+            velocity/build/libs/*.jar
+            bungee/build/libs/*.jar
+            sponge/build/libs/*.jar
           if-no-files-found: error

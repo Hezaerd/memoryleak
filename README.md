@@ -30,7 +30,7 @@ The commands require level 4 operator access or Minecraft's equivalent administr
 
 ## Build the mods
 
-Set `JAVA_HOME` to a JDK 25 installation and run `./gradlew buildMods` from the repository root. On Windows use `.\gradlew.bat buildMods`. Gradle finds or downloads the JDKs required by the individual nodes. The task runs the core tests and writes each distributable jar to `versions/<node>/build/libs/`.
+Set `JAVA_HOME` to a JDK 25 installation and run `./gradlew buildAll` from the repository root. On Windows use `.\gradlew.bat buildAll`. Gradle finds or downloads the JDKs required by the individual nodes. The task runs the core tests and writes each mod jar to `versions/<node>/build/libs/` and each plugin jar to `<platform>/build/libs/`.
 
 To build one jar, run `./gradlew :<node>:assemble`, for example `./gradlew :1.20.1-forge:assemble`.
 
@@ -51,6 +51,33 @@ python scripts/smoke-mods.py --accept-eula 1.20.1-forge
 ```
 
 The script uses throwaway server directories under `.smoke/`. It leaves the console and installer logs there for inspection.
+
+## Server plugins
+
+Build once per platform. Copy the matching jar to the server's plugin directory.
+
+| Platform | Jar in the module's `build/libs` directory | Compatibility | Install in |
+|---|---|---|---|
+| Bukkit, Spigot, Paper, Purpur, Folia | `memory-leak-bukkit-<version>.jar` | Minecraft 1.13.2 through 26.3, where the platform has a release | `plugins/` |
+| Velocity | `memory-leak-velocity-<version>.jar` | Velocity 3.5.1 and 4.3.1 | `plugins/` |
+| BungeeCord, Waterfall | `memory-leak-bungee-<version>.jar` | BungeeCord build 2111 and Waterfall final build 615 | `plugins/` |
+| Sponge | `memory-leak-sponge-<version>.jar` | SpongeAPI 17 on Minecraft 1.21.10 | `mods/` |
+
+The command and boss bar use the `memoryleak.admin` permission. Bukkit and Sponge grant access to operators by default. Proxies have no Minecraft operator list. The proxy console has access by default, and player access requires the proxy permission. BungeeCord and Waterfall have no boss bar API.
+
+The Bukkit jar uses the Bukkit scheduler on Bukkit-derived servers and selects Folia's global region scheduler at runtime. Reflection keeps the jar compatible with the Spigot 1.13.2 API. The smoke test covers Paper at both ends of the range and recent Folia and Purpur. Spigot and CraftBukkit require BuildTools, so their compatibility is based on the Bukkit API exercised on Paper and Purpur. Waterfall is end-of-life. Proxy Modrinth game tags describe the tested builds' client protocol support. The BungeeCord and Waterfall listing uses their shared range through 26.2.
+
+### Build and smoke-test the plugins
+
+Set `JAVA_HOME` to JDK 25. Use Python 3.8 or newer. Run these commands in Windows PowerShell.
+
+```powershell
+.\gradlew.bat --configure-on-demand :core:test :bukkit:build :velocity:build :bungee:build :sponge:build
+$java8 = .\gradlew.bat --configure-on-demand -q :bukkit:printJava8
+python scripts/smoke-plugins.py --java8 $java8 --java21 "$env:JAVA21_HOME/bin/java.exe" --java25 "$env:JAVA_HOME/bin/java.exe"
+```
+
+Set `JAVA21_HOME` to a Java 21 installation before running the smoke test. The Gradle task provisions Java 8 through Foojay for Paper 1.13.2. Pass server names to run a subset, or use `--help` to list the names. Each run accepts the EULA for its fresh server directory under `build/smoke-plugins/` and saves the console log there.
 
 ## License
 

@@ -16,18 +16,21 @@ stonecutter.parameters {
 }
 
 def nodes = subprojects.findAll { it.projectDir.parentFile == file('versions') }
+def plugins = [':bukkit', ':velocity', ':bungee', ':sponge']
 
-tasks.register('buildMods') {
+tasks.register('buildAll') {
     group = 'build'
-    description = 'Builds the distributable jar for every mod node.'
+    description = 'Builds the distributable jar for every mod node and server plugin.'
     dependsOn nodes.collect { "${it.path}:assemble" }
+    dependsOn plugins.collect { "${it}:assemble" }
     dependsOn ':core:test'
 }
 
-tasks.register('publishAllMods') {
+tasks.register('publishAll') {
     group = 'publishing'
-    description = 'Publishes every mod node to Modrinth.'
+    description = 'Publishes every mod node and server plugin to Modrinth.'
     dependsOn nodes.collect { "${it.path}:publishMods" }
+    dependsOn plugins.collect { "${it}:publishMods" }
 }
 
 def modVersion = version.toString()

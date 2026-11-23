@@ -5,6 +5,8 @@
 - Build all supported Minecraft and loader combinations from one Stonecutter project.
 - Share the command and allocation logic across Fabric, Quilt, NeoForge, and Forge.
 - Add a dedicated-server smoke test for the built mod jars.
+- Add server plugins for Bukkit, Spigot, Paper, Purpur, Folia, Velocity, BungeeCord, Waterfall, and SpongeAPI 17, with their own smoke test.
+- A second leak now adds to memory still held instead of resetting the counter.
 
 ## 2.0.0
 

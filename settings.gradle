@@ -15,6 +15,7 @@ plugins {
 
 rootProject.name = 'memory-leak'
 include('core')
+include('bukkit', 'velocity', 'bungee', 'sponge')
 
 def matrix = file('versions').listFiles()
         .findAll { new File(it, 'gradle.properties').isFile() }
