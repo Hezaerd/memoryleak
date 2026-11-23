@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": ["${mod_author}"],
+  "contact": {
+    "homepage": "https://hezaerd.com/",
+    "sources": "https://github.com/Hezaerd/memory-leak"
+  },
+  "license": "${mod_license}",
+  "icon": "ml.png",
+  "entrypoints": {
+    "main": ["com.hezaerd.memoryleak.MemoryLeak"]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_min}",
+    "fabric-api": "*",
+    "minecraft": ["${minecraft_versions}"],
+    "java": ">=${java_version}"
+  }
+}

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Build all supported Minecraft and loader combinations from one Stonecutter project.
+- Share the command and allocation logic across Fabric, Quilt, NeoForge, and Forge.
+- Add a dedicated-server smoke test for the built mod jars.
+
 ## 2.0.0
 
 ### Added

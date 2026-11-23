@@ -1,0 +1,51 @@
+plugins {
+    id 'dev.kikugie.stonecutter'
+    id 'net.fabricmc.fabric-loom' version '1.20.0-alpha.31' apply false
+    id 'net.fabricmc.fabric-loom-remap' version '1.20.0-alpha.31' apply false
+    id 'net.neoforged.moddev' version '2.0.148' apply false
+    id 'net.neoforged.moddev.legacyforge' version '2.0.148' apply false
+    id 'me.modmuss50.mod-publish-plugin' version '1.1.0' apply false
+}
+
+stonecutter.active "26.3-neoforge" /* [SC] DO NOT EDIT */
+
+stonecutter.parameters {
+    def loader = node.project.property('mod_loader')
+    constants['fabric'] = loader == 'fabric'
+    constants['neoforge'] = loader == 'neoforge'
+}
+
+def nodes = subprojects.findAll { it.projectDir.parentFile == file('versions') }
+
+tasks.register('buildMods') {
+    group = 'build'
+    description = 'Builds the distributable jar for every mod node.'
+    dependsOn nodes.collect { "${it.path}:assemble" }
+    dependsOn ':core:test'
+}
+
+tasks.register('publishAllMods') {
+    group = 'publishing'
+    description = 'Publishes every mod node to Modrinth.'
+    dependsOn nodes.collect { "${it.path}:publishMods" }
+}
+
+def modVersion = version.toString()
+ext.releaseChangelog = providers.fileContents(layout.projectDirectory.file('CHANGELOG.md')).asText.map { text ->
+    def sections = (text.replace('\r\n', '\n') =~ /(?ms)^##\s+(.+?)\n(.*?)(?=^##\s+|\z)/)
+    String unreleased = null
+    while (sections.find()) {
+        String heading = sections.group(1).trim()
+        String section = "## ${heading}\n\n${sections.group(2).trim()}"
+        if (heading == modVersion || heading.startsWith("${modVersion} ")) {
+            return section
+        }
+        if (heading == 'Unreleased') {
+            unreleased = section
+        }
+    }
+    if (unreleased == null) {
+        throw new GradleException("No changelog section for ${modVersion} or Unreleased")
+    }
+    unreleased
+}
