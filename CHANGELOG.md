@@ -1,6 +1,21 @@
 # Changelog
 
-## [1.0.0] - 2026-01-24
+## Unreleased
+
+- Build all supported Minecraft and loader combinations from one Stonecutter project.
+- Share the command and allocation logic across Fabric, Quilt, NeoForge, and Forge.
+- Add a dedicated-server smoke test for the built mod jars.
+- Add server plugins for Bukkit, Spigot, Paper, Purpur, Folia, Velocity, BungeeCord, Waterfall, and SpongeAPI 17, with their own smoke test.
+- A second leak now adds to memory still held instead of resetting the counter.
+
+## 2.0.0
+
+### Added
+- Ported the mod to a Fabric + NeoForge multiloader layout.
+- Added shared command and leak logic.
+
+
+## 1.0.0
 
 ### Added
 - Initial release

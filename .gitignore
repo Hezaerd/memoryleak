@@ -28,9 +28,10 @@ bin/
 
 *.DS_Store
 
-# fabric
+# minecraft
 
-run/
+run
+runs
 
 # java
 
@@ -38,3 +39,6 @@ hs_err_*.log
 replay_*.log
 *.hprof
 *.jfr
+
+# dedicated server smoke tests
+/.smoke/

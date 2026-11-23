@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v6
+      - run: ./gradlew buildAll --parallel --max-workers=2
+      - uses: actions/upload-artifact@v7
+        with:
+          name: memory-leak
+          path: |
+            versions/*/build/libs/*.jar
+            bukkit/build/libs/*.jar
+            velocity/build/libs/*.jar
+            bungee/build/libs/*.jar
+            sponge/build/libs/*.jar
+          if-no-files-found: error

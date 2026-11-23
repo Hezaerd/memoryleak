@@ -1,29 +1,23 @@
 {
-	"schemaVersion": 1,
-	"id": "ml",
-	"version": "${version}",
-	"name": "Memory Leak",
-	"description": "A server-side mod for intentionally causing controlled memory leaks. Perfect for stress testing servers and memory monitoring tools.",
-	"authors": [
-		"Hezaerd"
-	],
-	"contact": {
-		"homepage": "https://modrinth.com/mod/memory-leak",
-        "sources": "https://github.com/Hezaerd/memory-leak",
-        "issues": "https://github.com/Hezaerd/memory-leak/issues"
-	},
-	"license": "MIT",
-	"icon": "assets/ml/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-          "com.hezaerd.MemoryLeak"
-		]
-	},
-	"depends": {
-		"fabricloader": ">=0.18.4",
-		"minecraft": "${minecraft_version}",
-		"java": ">=21",
-		"fabric-api": "*"
-	}
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": ["${mod_author}"],
+  "contact": {
+    "homepage": "https://hezaerd.com/",
+    "sources": "https://github.com/Hezaerd/memory-leak"
+  },
+  "license": "${mod_license}",
+  "icon": "ml.png",
+  "entrypoints": {
+    "main": ["com.hezaerd.memoryleak.MemoryLeak"]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_min}",
+    "fabric-api": "*",
+    "minecraft": ["${minecraft_versions}"],
+    "java": ">=${java_version}"
+  }
 }

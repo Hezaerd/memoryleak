@@ -1,0 +1,36 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.kikugie.dev/releases' }
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.neoforged.net/releases' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'dev.kikugie.stonecutter' version '0.10'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'memory-leak'
+include('core')
+include('bukkit', 'velocity', 'bungee', 'sponge')
+
+def matrix = file('versions').listFiles()
+        .findAll { new File(it, 'gradle.properties').isFile() }
+        .sort { it.name }
+        .collectEntries { directory ->
+            def properties = new Properties()
+            new File(directory, 'gradle.properties').withInputStream { properties.load(it) }
+            [(directory.name): properties.getProperty('minecraft_version')]
+        }
+
+stonecutter {
+    kotlinController = false
+    centralScript = 'build.gradle'
+    create(rootProject) { tree ->
+        tree.versions(matrix)
+        tree.vcsVersion = '26.3-neoforge'
+    }
+}

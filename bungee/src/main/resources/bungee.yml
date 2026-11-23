@@ -1,0 +1,4 @@
+name: MemoryLeak
+version: '${version}'
+main: com.hezaerd.memoryleak.bungee.MemoryLeakPlugin
+author: Hezaerd

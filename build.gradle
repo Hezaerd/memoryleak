@@ -1,0 +1,121 @@
+plugins {
+    id 'java'
+    id 'me.modmuss50.mod-publish-plugin'
+}
+
+def loader = mod_loader
+def mc = stonecutter.current.version
+def remap = loader == 'fabric' && fabric_remap.toBoolean()
+def gameVersions = minecraft_versions.split(',').toList()
+def modVersion = rootProject.version.toString()
+def releaseVersion = "${modVersion}+mc${project.name}"
+def loaderNames = [fabric: 'Fabric', neoforge: 'NeoForge', forge: 'Forge']
+
+group = rootProject.group
+version = releaseVersion
+base.archivesName = 'memory-leak'
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets.main.java.srcDir rootProject.file('core/src/main/java')
+
+def distributionTask = 'jar'
+switch (loader) {
+    case 'fabric':
+        apply plugin: remap ? 'net.fabricmc.fabric-loom-remap' : 'net.fabricmc.fabric-loom'
+        dependencies {
+            minecraft "com.mojang:minecraft:${mc}"
+            if (remap) {
+                mappings loom.officialMojangMappings()
+                modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+            } else {
+                implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+            }
+            implementation "net.fabricmc:fabric-loader:${loader_version}"
+        }
+        distributionTask = remap ? 'remapJar' : 'jar'
+        break
+    case 'neoforge':
+        apply plugin: 'net.neoforged.moddev'
+        neoForge {
+            version = loader_version
+            runs {
+                server { server() }
+            }
+            mods {
+                "${mod_id}" { sourceSet sourceSets.main }
+            }
+        }
+        break
+    case 'forge':
+        apply plugin: 'net.neoforged.moddev.legacyforge'
+        legacyForge {
+            version = loader_version
+            runs {
+                server { server() }
+            }
+            mods {
+                "${mod_id}" { sourceSet sourceSets.main }
+            }
+        }
+        distributionTask = 'reobfJar'
+        break
+    default:
+        throw new GradleException("Unknown mod loader: ${loader}")
+}
+
+def metadataFile = [
+    fabric: 'fabric.mod.json',
+    neoforge: 'META-INF/neoforge.mods.toml',
+    forge: 'META-INF/mods.toml'
+][loader]
+def minimumLoader = findProperty('loader_version_min') ?: loader_version
+def metadata = [
+    mod_id: mod_id,
+    mod_name: mod_name,
+    mod_author: mod_author,
+    mod_description: mod_description,
+    mod_license: mod_license,
+    version: modVersion,
+    java_version: java_version,
+    minecraft_versions: gameVersions.join('","'),
+    minecraft_version_range: gameVersions.collect { "[${it}]" }.join(','),
+    loader_version_range: loader == 'forge' ? "[${loader_version.substring(mc.length() + 1)},)" : "[${minimumLoader},)",
+    fml_version_range: findProperty('fml_version_range') ?: '',
+    fabric_loader_min: findProperty('fabric_loader_min') ?: ''
+]
+tasks.named('processResources') {
+    inputs.properties(metadata)
+    exclude { it.path in ['fabric.mod.json', 'META-INF/neoforge.mods.toml', 'META-INF/mods.toml']
+            && it.path != metadataFile }
+    filesMatching(metadataFile) { expand(metadata) }
+}
+tasks.named('jar') {
+    from(rootProject.file('LICENSE'))
+}
+
+publishMods {
+    file = tasks.named(distributionTask).flatMap { it.archiveFile }
+    changelog = rootProject.ext.releaseChangelog
+    version = releaseVersion
+    displayName = "${mod_name} ${modVersion} for ${loaderNames[loader]} ${gameVersions.join(', ')}"
+    type = STABLE
+
+    modLoaders.add(loader)
+    if (findProperty('quilt_loader_version')) {
+        modLoaders.add('quilt')
+    }
+
+    modrinth {
+        accessToken = providers.environmentVariable('MODRINTH_TOKEN')
+        projectId = 'Aqk3l0pH'
+        minecraftVersions.addAll(gameVersions)
+        projectDescription = providers.fileContents(rootProject.layout.projectDirectory.file('README.md')).asText
+        if (loader == 'fabric') {
+            requires('fabric-api')
+        }
+    }
+}
