@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.0
 
 - Build all supported Minecraft and loader combinations from one Stonecutter project.
 - Share the command and allocation logic across Fabric, Quilt, NeoForge, and Forge.
